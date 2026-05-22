@@ -4,44 +4,44 @@ import { CheckCircle2, Clock, FileWarning, Hourglass, MapPin, Bell, ChevronRight
 import { PageShell } from "@/components/site/PageShell";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Your plan — After" }] }),
+  head: () => ({ meta: [{ title: "Planul tău — After" }] }),
   component: Dashboard,
 });
 
 type Status = "done" | "pending" | "waiting" | "missing";
 const statusMeta: Record<Status, { label: string; icon: typeof CheckCircle2; cls: string }> = {
-  done: { label: "Completed", icon: CheckCircle2, cls: "bg-success/15 text-success-foreground" },
-  pending: { label: "Pending", icon: Clock, cls: "bg-primary/10 text-primary" },
-  waiting: { label: "Waiting", icon: Hourglass, cls: "bg-muted text-muted-foreground" },
-  missing: { label: "Needs a document", icon: FileWarning, cls: "bg-warning/20 text-warning-foreground" },
+  done: { label: "Finalizat", icon: CheckCircle2, cls: "bg-success/15 text-success-foreground" },
+  pending: { label: "În lucru", icon: Clock, cls: "bg-primary/10 text-primary" },
+  waiting: { label: "În așteptare", icon: Hourglass, cls: "bg-muted text-muted-foreground" },
+  missing: { label: "Lipsește un document", icon: FileWarning, cls: "bg-warning/20 text-warning-foreground" },
 };
 
 const sections: { title: string; subtitle: string; tasks: { title: string; place: string; status: Status; note?: string }[] }[] = [
   {
-    title: "Right away",
-    subtitle: "These help close the immediate paperwork.",
+    title: "Imediat",
+    subtitle: "Acestea închid hârtiile de urgență.",
     tasks: [
-      { title: "Register the death at the local council", place: "Primăria Sector 2", status: "done" },
-      { title: "Request the official death certificate", place: "Starea Civilă", status: "pending" },
-      { title: "Notify the employer", place: "By email or letter", status: "missing", note: "We still need one document to continue." },
+      { title: "Înregistrează decesul la primărie", place: "Primăria Sector 2", status: "done" },
+      { title: "Solicită certificatul oficial de deces", place: "Starea Civilă", status: "pending" },
+      { title: "Anunță angajatorul", place: "Prin email sau scrisoare", status: "missing", note: "Mai avem nevoie de un document ca să continuăm." },
     ],
   },
   {
-    title: "This week",
-    subtitle: "Plan these when you feel ready.",
+    title: "Săptămâna aceasta",
+    subtitle: "Planifică-le când te simți pregătit.",
     tasks: [
-      { title: "Cancel the ID card and passport", place: "Evidența Persoanelor", status: "waiting" },
-      { title: "Notify the family doctor", place: "Cabinet medical", status: "pending" },
-      { title: "Apply for the funeral allowance", place: "Casa de Pensii", status: "pending" },
+      { title: "Anulează cartea de identitate și pașaportul", place: "Evidența Persoanelor", status: "waiting" },
+      { title: "Anunță medicul de familie", place: "Cabinet medical", status: "pending" },
+      { title: "Solicită ajutorul de înmormântare", place: "Casa de Pensii", status: "pending" },
     ],
   },
   {
-    title: "Long-term",
-    subtitle: "Succession takes time. We'll remind you gently.",
+    title: "Pe termen lung",
+    subtitle: "Succesiunea cere timp. Îți reamintim cu blândețe.",
     tasks: [
-      { title: "Open the succession file", place: "Notar public", status: "waiting" },
-      { title: "Transfer vehicle ownership", place: "DRPCIV", status: "waiting" },
-      { title: "Update utility contracts", place: "Furnizori", status: "waiting" },
+      { title: "Deschide dosarul de succesiune", place: "Notar public", status: "waiting" },
+      { title: "Transferă proprietatea autovehiculului", place: "DRPCIV", status: "waiting" },
+      { title: "Actualizează contractele de utilități", place: "Furnizori", status: "waiting" },
     ],
   },
 ];
@@ -54,16 +54,16 @@ function Dashboard() {
         <div className="rounded-4xl border border-border bg-surface p-7 md:p-10">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Plan for the Popescu family</p>
-              <h1 className="mt-2 font-display text-3xl md:text-4xl">Welcome back, Andrei.</h1>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Plan pentru familia Popescu</p>
+              <h1 className="mt-2 font-display text-3xl md:text-4xl">Bine ai revenit, Andrei.</h1>
               <p className="mt-2 max-w-xl text-muted-foreground">
-                You've completed <span className="text-foreground">4 of 12</span> steps. Take your time —
-                we'll keep your plan up to date.
+                Ai finalizat <span className="text-foreground">4 din 12</span> pași. Ia-ți timpul de care ai nevoie —
+                ținem planul actualizat pentru tine.
               </p>
             </div>
             <div className="flex items-center gap-3">
               <button className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm hover:bg-surface-soft">
-                <Bell className="h-4 w-4" /> Reminders
+                <Bell className="h-4 w-4" /> Reamintiri
               </button>
             </div>
           </div>
