@@ -6,7 +6,7 @@ import { PageShell } from "@/components/site/PageShell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/translator")({
-  head: () => ({ meta: [{ title: "AI translator — After" }] }),
+  head: () => ({ meta: [{ title: "Traducător AI — After" }] }),
   component: Translator,
 });
 
@@ -17,7 +17,7 @@ const seed: Msg[] = [
   {
     from: "after",
     text:
-      "This is a document a notary issues at the start of succession. It confirms who the heirs are and what assets exist, and it's usually required before ownership can be legally transferred. You don't need to prepare it yourself — your notary will produce it from the documents you've already uploaded.",
+      "Este un document eliberat de notar la începutul succesiunii. Confirmă cine sunt moștenitorii și ce bunuri există și e necesar, de regulă, înainte ca proprietatea să poată fi transferată legal. Nu trebuie să-l pregătești tu — notarul îl întocmește pe baza documentelor pe care le-ai încărcat deja.",
   },
 ];
 
@@ -33,7 +33,7 @@ function Translator() {
     setTimeout(() => {
       setMessages((m) => [
         ...m,
-        { from: "after", text: "In plain language: this is a step that helps prove your role. We'll guide you through it when it's needed — there's nothing to do right now." },
+        { from: "after", text: "Pe înțelesul tuturor: este un pas care ajută la dovedirea calității tale. Te ghidăm prin el atunci când va fi nevoie — momentan nu ai nimic de făcut." },
       ]);
     }, 600);
   };
@@ -46,8 +46,8 @@ function Translator() {
             <Sparkles className="h-5 w-5" />
           </span>
           <div>
-            <h1 className="font-display text-3xl">Bureaucracy translator</h1>
-            <p className="text-sm text-muted-foreground">Paste any term, form name, or letter. We'll explain it kindly.</p>
+            <h1 className="font-display text-3xl">Traducător de birocrație</h1>
+            <p className="text-sm text-muted-foreground">Lipește orice termen, denumire de formular sau scrisoare. Îți explicăm cu blândețe.</p>
           </div>
         </div>
 
@@ -82,12 +82,12 @@ function Translator() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
-              placeholder="e.g. Adeverință de moștenitor"
+              placeholder="ex. Adeverință de moștenitor"
               className="flex-1 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
-              aria-label="Term to explain"
+              aria-label="Termen de explicat"
             />
             <Button onClick={send} className="h-10 rounded-xl">
-              Explain <Send className="ml-1 h-4 w-4" />
+              Explică <Send className="ml-1 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -99,7 +99,7 @@ function Translator() {
               onClick={() => setInput(s)}
               className="rounded-2xl border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-surface-soft"
             >
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">Try</span>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">Încearcă</span>
               <p className="mt-1 text-foreground">{s}</p>
             </button>
           ))}

@@ -8,15 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/security")({
-  head: () => ({ meta: [{ title: "Sign in — After" }] }),
+  head: () => ({ meta: [{ title: "Autentificare — After" }] }),
   component: Security,
 });
 
 const audit = [
-  { t: "Andrei signed in from Bucharest", time: "Today · 09:21", icon: KeyRound },
-  { t: "Av. Mihai Stan viewed Succession file", time: "Yesterday · 16:04", icon: Eye },
-  { t: "Marriage certificate uploaded by Elena", time: "13 May · 11:12", icon: Lock },
-  { t: "2FA enabled for the family account", time: "10 May · 08:40", icon: ShieldCheck },
+  { t: "Andrei s-a autentificat din București", time: "Astăzi · 09:21", icon: KeyRound },
+  { t: "Av. Mihai Stan a vizualizat Dosarul de succesiune", time: "Ieri · 16:04", icon: Eye },
+  { t: "Certificat de căsătorie încărcat de Elena", time: "13 mai · 11:12", icon: Lock },
+  { t: "2FA activat pentru contul de familie", time: "10 mai · 08:40", icon: ShieldCheck },
 ];
 
 function Security() {
@@ -27,25 +27,25 @@ function Security() {
         {/* Sign in */}
         <section className="rounded-4xl border border-border bg-card p-7 shadow-soft md:p-10">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
-            <ShieldCheck className="h-3.5 w-3.5" /> Secured by ROeID
+            <ShieldCheck className="h-3.5 w-3.5" /> Securizat cu ROeID
           </span>
-          <h1 className="mt-4 font-display text-3xl">Sign in to continue</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Your information is private to you and the people you choose.</p>
+          <h1 className="mt-4 font-display text-3xl">Autentifică-te pentru a continua</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Informațiile tale sunt private — doar tu și persoanele alese de tine le văd.</p>
 
           <div className="mt-8 space-y-4">
             <div>
-              <Label className="text-xs text-muted-foreground">Email or CNP</Label>
-              <Input className="mt-2 h-12 rounded-xl" placeholder="you@example.com" />
+              <Label className="text-xs text-muted-foreground">Email sau CNP</Label>
+              <Input className="mt-2 h-12 rounded-xl" placeholder="tu@exemplu.ro" />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Password</Label>
+              <Label className="text-xs text-muted-foreground">Parolă</Label>
               <Input type="password" className="mt-2 h-12 rounded-xl" placeholder="••••••••" />
             </div>
             <Button onClick={() => setShowTfa(true)} className="h-12 w-full rounded-xl text-base">
-              Continue securely
+              Continuă în siguranță
             </Button>
             <button className="w-full rounded-xl border border-border bg-background py-3 text-sm hover:bg-surface-soft">
-              Use ROeID app instead
+              Folosește aplicația ROeID
             </button>
           </div>
         </section>
@@ -54,9 +54,9 @@ function Security() {
         <section>
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-muted-foreground" />
-            <h2 className="font-display text-2xl">Activity & audit log</h2>
+            <h2 className="font-display text-2xl">Jurnal de activitate</h2>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">An immutable record of who did what, when.</p>
+          <p className="mt-1 text-sm text-muted-foreground">O înregistrare imutabilă a cine ce a făcut și când.</p>
 
           <ol className="relative mt-6 space-y-3 border-l border-border pl-6">
             {audit.map((a, i) => (
@@ -75,7 +75,7 @@ function Security() {
           <div className="mt-6 rounded-3xl border border-border bg-surface p-5">
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 text-success" />
-              <p className="text-sm">All data is encrypted at rest with AES-256 and protected by GDPR-aligned access controls.</p>
+              <p className="text-sm">Toate datele sunt criptate la repaus cu AES-256 și protejate prin controale de acces conforme GDPR.</p>
             </div>
           </div>
         </section>
@@ -88,7 +88,7 @@ function Security() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 grid place-items-center bg-foreground/30 p-5 backdrop-blur-sm"
             onClick={() => setShowTfa(false)}
-            role="dialog" aria-modal="true" aria-label="Two factor verification"
+            role="dialog" aria-modal="true" aria-label="Verificare în doi pași"
           >
             <motion.div
               initial={{ scale: 0.96, y: 8, opacity: 0 }}
@@ -101,22 +101,22 @@ function Security() {
               <span className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/10 text-primary">
                 <ShieldCheck className="h-5 w-5" />
               </span>
-              <h3 className="mt-4 font-display text-2xl">Verify it's you</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Enter the 6-digit code we sent to your phone.</p>
+              <h3 className="mt-4 font-display text-2xl">Confirmă că ești tu</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Introdu codul din 6 cifre trimis pe telefonul tău.</p>
               <div className="mt-6 flex justify-between gap-2">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <input
                     key={i}
                     maxLength={1}
                     inputMode="numeric"
-                    aria-label={`Digit ${i + 1}`}
+                    aria-label={`Cifra ${i + 1}`}
                     className="h-14 w-12 rounded-xl border border-border bg-background text-center text-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 ))}
               </div>
-              <Button className="mt-6 h-12 w-full rounded-xl">Verify and continue</Button>
+              <Button className="mt-6 h-12 w-full rounded-xl">Verifică și continuă</Button>
               <button onClick={() => setShowTfa(false)} className="mt-3 w-full text-sm text-muted-foreground hover:text-foreground">
-                Cancel
+                Anulează
               </button>
             </motion.div>
           </motion.div>

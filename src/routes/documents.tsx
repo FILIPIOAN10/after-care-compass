@@ -4,20 +4,20 @@ import { PageShell } from "@/components/site/PageShell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/documents")({
-  head: () => ({ meta: [{ title: "Documents — After" }] }),
+  head: () => ({ meta: [{ title: "Documente — After" }] }),
   component: Documents,
 });
 
 const docs = [
-  { name: "Death certificate", category: "Identity", meta: "Issued · 14 May 2026", size: "1.2 MB" },
-  { name: "ID card (deceased)", category: "Identity", meta: "Extracted: CNP, address", size: "0.4 MB" },
-  { name: "Marriage certificate", category: "Family", meta: "Cluj-Napoca, 1987", size: "0.6 MB" },
-  { name: "Property deed — Bucharest", category: "Assets", meta: "Apt., sector 2", size: "2.1 MB" },
-  { name: "Vehicle title", category: "Assets", meta: "B-123-ABC", size: "0.3 MB" },
-  { name: "Funeral allowance form", category: "Generated", meta: "Pre-filled by After", size: "0.2 MB" },
+  { name: "Certificat de deces", category: "Identitate", meta: "Emis · 14 mai 2026", size: "1,2 MB" },
+  { name: "Carte de identitate (decedat)", category: "Identitate", meta: "Extras: CNP, adresă", size: "0,4 MB" },
+  { name: "Certificat de căsătorie", category: "Familie", meta: "Cluj-Napoca, 1987", size: "0,6 MB" },
+  { name: "Act de proprietate — București", category: "Bunuri", meta: "Apartament, sector 2", size: "2,1 MB" },
+  { name: "Talon autovehicul", category: "Bunuri", meta: "B-123-ABC", size: "0,3 MB" },
+  { name: "Cerere ajutor de înmormântare", category: "Generate", meta: "Pre-completat de After", size: "0,2 MB" },
 ];
 
-const cats = ["All", "Identity", "Family", "Assets", "Generated"];
+const cats = ["Toate", "Identitate", "Familie", "Bunuri", "Generate"];
 
 function Documents() {
   return (
@@ -25,13 +25,13 @@ function Documents() {
       <div className="mx-auto max-w-6xl px-5 py-12 md:py-16">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="font-display text-3xl md:text-4xl">Document center</h1>
+            <h1 className="font-display text-3xl md:text-4xl">Centrul de documente</h1>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              Everything you've uploaded and everything we've prepared for you. Encrypted at rest.
+              Tot ce ai încărcat și tot ce am pregătit pentru tine. Stocat criptat.
             </p>
           </div>
           <Button className="h-11 rounded-full px-5">
-            <Upload className="mr-1.5 h-4 w-4" /> Upload document
+            <Upload className="mr-1.5 h-4 w-4" /> Încarcă document
           </Button>
         </div>
 
@@ -61,10 +61,10 @@ function Documents() {
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{d.meta} · {d.size}</p>
                 <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-success-foreground">
-                  <ShieldCheck className="h-3 w-3" /> Encrypted
+                  <ShieldCheck className="h-3 w-3" /> Criptat
                 </p>
               </div>
-              <button className="rounded-full border border-border bg-background p-2 text-muted-foreground transition-colors hover:bg-surface-soft hover:text-foreground" aria-label="Download">
+              <button className="rounded-full border border-border bg-background p-2 text-muted-foreground transition-colors hover:bg-surface-soft hover:text-foreground" aria-label="Descarcă">
                 <Download className="h-4 w-4" />
               </button>
             </article>

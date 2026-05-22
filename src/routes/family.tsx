@@ -4,21 +4,21 @@ import { PageShell } from "@/components/site/PageShell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/family")({
-  head: () => ({ meta: [{ title: "Family — After" }] }),
+  head: () => ({ meta: [{ title: "Familie — After" }] }),
   component: Family,
 });
 
 const members = [
-  { name: "Andrei Popescu", role: "Family · Admin", color: "bg-primary/15 text-primary" },
-  { name: "Elena Popescu", role: "Family", color: "bg-muted text-foreground" },
-  { name: "Av. Mihai Stan", role: "Lawyer", color: "bg-success/15 text-success-foreground" },
-  { name: "Dana (caregiver)", role: "Caregiver · View only", color: "bg-warning/20 text-warning-foreground" },
+  { name: "Andrei Popescu", role: "Familie · Administrator", color: "bg-primary/15 text-primary" },
+  { name: "Elena Popescu", role: "Familie", color: "bg-muted text-foreground" },
+  { name: "Av. Mihai Stan", role: "Avocat", color: "bg-success/15 text-success-foreground" },
+  { name: "Dana (îngrijitor)", role: "Îngrijitor · Doar vizualizare", color: "bg-warning/20 text-warning-foreground" },
 ];
 
 const activity = [
-  { who: "Elena", what: "uploaded Marriage certificate", when: "2h ago", icon: Upload },
-  { who: "Av. Mihai Stan", what: "marked Succession file as in progress", when: "Yesterday", icon: CheckCircle2 },
-  { who: "Andrei", what: "left a note on Funeral allowance", when: "2 days ago", icon: MessageCircle },
+  { who: "Elena", what: "a încărcat Certificatul de căsătorie", when: "acum 2 ore", icon: Upload },
+  { who: "Av. Mihai Stan", what: "a marcat Dosarul de succesiune ca fiind în lucru", when: "ieri", icon: CheckCircle2 },
+  { who: "Andrei", what: "a lăsat o notă la Ajutorul de înmormântare", when: "acum 2 zile", icon: MessageCircle },
 ];
 
 function Family() {
@@ -27,19 +27,19 @@ function Family() {
       <div className="mx-auto max-w-5xl px-5 py-12 md:py-16">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="font-display text-3xl md:text-4xl">Walk this together</h1>
+            <h1 className="font-display text-3xl md:text-4xl">Mergeți împreună pe acest drum</h1>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              Invite family members, your lawyer, or a caregiver. You decide what each person can see.
+              Invită membri ai familiei, avocatul tău sau un îngrijitor. Tu decizi ce poate vedea fiecare.
             </p>
           </div>
           <Button className="h-11 rounded-full px-5">
-            <UserPlus className="mr-1.5 h-4 w-4" /> Invite someone
+            <UserPlus className="mr-1.5 h-4 w-4" /> Invită pe cineva
           </Button>
         </div>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_1fr]">
           <section>
-            <h2 className="font-display text-xl">People with access</h2>
+            <h2 className="font-display text-xl">Persoane cu acces</h2>
             <ul className="mt-4 space-y-3">
               {members.map((m) => (
                 <li key={m.name} className="flex items-center gap-4 rounded-3xl border border-border bg-card p-4 shadow-soft">
@@ -50,14 +50,14 @@ function Family() {
                     <p className="font-medium">{m.name}</p>
                     <p className="text-xs text-muted-foreground">{m.role}</p>
                   </div>
-                  <button className="rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:bg-surface-soft">Manage</button>
+                  <button className="rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:bg-surface-soft">Gestionează</button>
                 </li>
               ))}
             </ul>
           </section>
 
           <section>
-            <h2 className="font-display text-xl">Recent activity</h2>
+            <h2 className="font-display text-xl">Activitate recentă</h2>
             <ol className="mt-4 space-y-3">
               {activity.map((a, i) => (
                 <li key={i} className="flex gap-4 rounded-3xl border border-border bg-card p-4">

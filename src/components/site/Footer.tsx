@@ -7,30 +7,30 @@ export function Footer() {
         <div className="md:col-span-2">
           <Logo />
           <p className="mt-3 max-w-sm text-sm text-muted-foreground text-pretty">
-            A calm companion for Romanian families navigating the days after a loss.
+            Un însoțitor calm pentru familiile din România în zilele de după o pierdere.
           </p>
         </div>
         <div>
-          <h4 className="text-sm font-medium">Product</h4>
+          <h4 className="text-sm font-medium">Produs</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>Guided workflows</li>
-            <li>Document center</li>
-            <li>AI translator</li>
-            <li>Family collaboration</li>
+            <li>Pași ghidați</li>
+            <li>Centrul de documente</li>
+            <li>Traducător AI</li>
+            <li>Colaborare în familie</li>
           </ul>
         </div>
         <div>
-          <h4 className="text-sm font-medium">Care</h4>
+          <h4 className="text-sm font-medium">Sprijin</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>Support line</li>
-            <li>Privacy & security</li>
-            <li>Accessibility</li>
+            <li>Linie de asistență</li>
+            <li>Confidențialitate & securitate</li>
+            <li>Accesibilitate</li>
             <li>Contact</li>
           </ul>
         </div>
       </div>
       <div className="border-t border-border/60 py-5 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} After. Built with care, in Romania.
+        © {new Date().getFullYear()} After. Construit cu grijă, în România.
       </div>
     </footer>
   );
