@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
@@ -19,6 +19,13 @@ import {
   Flag,
   Globe2,
   Languages,
+  Car,
+  Landmark,
+  Banknote,
+  Briefcase,
+  Plug,
+  Scale,
+  Heart,
 } from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { Button } from "@/components/ui/button";
