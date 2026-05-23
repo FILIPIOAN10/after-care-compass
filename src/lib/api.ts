@@ -1,15 +1,50 @@
 // Client API către backend-ul Spring Boot.
 // În dezvoltare poți seta VITE_API_URL în .env.local (ex: http://localhost:8090).
+// În producție, dacă nu setezi nimic, utilizatorul poate configura URL-ul direct
+// din UI (dialogul „Setări API”), iar valoarea e salvată în localStorage.
 
 const FALLBACK_API_URL = "http://localhost:8090";
+const STORAGE_KEY = "after.api_url";
 
-function getApiBase(): string {
-  const fromEnv = (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_URL;
-  if (fromEnv && fromEnv.length > 0) return fromEnv.replace(/\/$/, "");
-  if (typeof window !== "undefined") {
-    const stored = window.localStorage?.getItem("after.api_url");
-    if (stored) return stored.replace(/\/$/, "");
+function envApiUrl(): string | undefined {
+  const v = (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_URL;
+  return v && v.length > 0 ? v.replace(/\/$/, "") : undefined;
+}
+
+export function hasBuildTimeApiUrl(): boolean {
+  return envApiUrl() !== undefined;
+}
+
+export function getStoredApiUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
   }
+}
+
+export function setStoredApiUrl(url: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (url && url.length > 0) {
+      window.localStorage.setItem(STORAGE_KEY, url.replace(/\/$/, ""));
+    } else {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("after:api-url-changed"));
+  }
+}
+
+export function getApiBase(): string {
+  const fromEnv = envApiUrl();
+  if (fromEnv) return fromEnv;
+  const stored = getStoredApiUrl();
+  if (stored) return stored.replace(/\/$/, "");
   return FALLBACK_API_URL;
 }
 
@@ -45,6 +80,12 @@ export class ApiError extends Error {
   }
 }
 
+export class NetworkError extends Error {
+  constructor(message = "Nu am putut contacta serverul.") {
+    super(message);
+  }
+}
+
 type RequestInitJson = Omit<RequestInit, "body"> & { body?: unknown };
 
 export async function api<T = unknown>(path: string, init: RequestInitJson = {}): Promise<T> {
@@ -65,11 +106,16 @@ export async function api<T = unknown>(path: string, init: RequestInitJson = {})
   const token = getToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(`${getApiBase()}${path}`, {
-    ...init,
-    headers,
-    body,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${getApiBase()}${path}`, {
+      ...init,
+      headers,
+      body,
+    });
+  } catch {
+    throw new NetworkError();
+  }
 
   if (res.status === 204) {
     return undefined as T;
@@ -77,11 +123,16 @@ export async function api<T = unknown>(path: string, init: RequestInitJson = {})
 
   const ct = res.headers.get("content-type") ?? "";
   const isJson = ct.includes("application/json");
-  const payload = isJson ? await res.json().catch(() => undefined) : await res.text().catch(() => "");
+  const payload = isJson
+    ? await res.json().catch(() => undefined)
+    : await res.text().catch(() => "");
 
   if (!res.ok) {
     const message =
-      isJson && payload && typeof payload === "object" && "message" in (payload as Record<string, unknown>)
+      isJson &&
+      payload &&
+      typeof payload === "object" &&
+      "message" in (payload as Record<string, unknown>)
         ? String((payload as Record<string, unknown>).message)
         : typeof payload === "string" && payload.length > 0
           ? payload
@@ -97,6 +148,22 @@ export async function api<T = unknown>(path: string, init: RequestInitJson = {})
 
 export function apiDownloadUrl(path: string): string {
   return `${getApiBase()}${path}`;
+}
+
+/**
+ * Verifică dacă backend-ul răspunde. Folosește un endpoint public (no auth)
+ * așa că nu necesită token. Întoarce true dacă răspunde 2xx.
+ */
+export async function pingApi(signal?: AbortSignal): Promise<boolean> {
+  try {
+    const res = await fetch(`${getApiBase()}/api/translator/suggestions`, {
+      method: "GET",
+      signal,
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 // ===== Tipuri partajate =====

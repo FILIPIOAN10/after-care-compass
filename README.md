@@ -68,8 +68,10 @@ bun run dev     # sau: npm run dev
 
 Vite servește pe `http://localhost:8080`.
 
-> Dacă vrei să schimbi adresa backend‑ului, copiază `.env.example` în
-> `.env.local` și actualizează `VITE_API_URL`.
+> Dacă vrei să schimbi adresa backend‑ului, ai trei opțiuni:
+> - copiază `.env.example` în `.env.local` și actualizează `VITE_API_URL` (rebuild necesar);
+> - sau apasă **Setări API** în bannerul galben care apare când backend-ul nu răspunde;
+> - sau pune manual în `localStorage` cheia `after.api_url`.
 
 ### 3. Folosește aplicația
 
@@ -106,12 +108,36 @@ DB_USERNAME=after DB_PASSWORD=after \
 
 ---
 
-## Build pentru producție
+## Deploiere (varianta gratuită)
+
+Frontend-ul este deploiat de Lovable / Cloudflare Workers automat din branch.
+**Backend-ul trebuie deploiat separat** — repo-ul are deja un `Dockerfile` și
+un `render.yaml`, deci poți folosi planul gratuit de pe Render în câteva minute:
+
+1. Creează cont pe [render.com](https://render.com) și conectează acest repo.
+2. Render detectează `render.yaml` și creează automat serviciul `after-api`
+   (free, Frankfurt, Docker).
+3. Așteaptă primul build (~3 minute) și copiază URL-ul public
+   (ex: `https://after-api.onrender.com`).
+4. Deschide site-ul live → apasă **Setări API** în bannerul galben →
+   lipește URL-ul → **Salvează**. Site-ul se reîncarcă conectat la backend.
+
+> Planul Free Render pune serviciul în „sleep” după 15 min de inactivitate.
+> Prima cerere durează ~30 secunde să-l trezească.
+
+Alternativ poți deploia pe Railway, Fly.io, Koyeb sau orice host care suportă
+Docker — `backend/Dockerfile` e portabil.
+
+## Build pentru producție (manual)
 
 ```bash
-# Backend (un singur jar runnable)
+# Backend ca jar runnable
 cd backend && ./mvnw -DskipTests package
 java -jar target/after-api-0.1.0.jar
+
+# Backend ca imagine Docker
+docker build -t after-api ./backend
+docker run -p 8090:8090 -e JWT_SECRET=$(openssl rand -hex 32) after-api
 
 # Frontend (static + Cloudflare Worker)
 bun run build
@@ -126,6 +152,7 @@ bun run build
 ├── backend/                 # Spring Boot API
 │   ├── pom.xml
 │   ├── mvnw / mvnw.cmd      # Maven Wrapper — nu necesită Maven instalat
+│   ├── Dockerfile           # multi-stage JDK 21 -> JRE 21
 │   └── src/main/java/ro/after/api/
 │       ├── auth/            # User, JWT, AuthController
 │       ├── case_/           # Dosarul familiei + onboarding
@@ -137,10 +164,11 @@ bun run build
 │       ├── config/          # Spring Security, JWT, CORS, storage
 │       └── common/          # CurrentUser, ApiException, handlers
 ├── src/                     # Frontend TanStack Start
-│   ├── lib/api.ts           # Client REST + tipuri
+│   ├── lib/api.ts           # Client REST + tipuri + ping conectivitate
 │   ├── lib/auth.tsx         # Auth context (JWT în localStorage)
 │   ├── routes/              # index, onboarding, dashboard, documents, family, translator, security
-│   └── components/site/     # Header, Footer, PageShell, Logo
+│   └── components/site/     # Header, Footer, PageShell, Logo, ApiConnectivity
+├── render.yaml              # Deploiere one-click pe Render (Docker, free)
 └── README.md
 ```
 
