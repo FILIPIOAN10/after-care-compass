@@ -1,0 +1,56 @@
+server:
+  port: ${PORT:8090}
+
+spring:
+  application:
+    name: after-api
+  datasource:
+    url: jdbc:h2:mem:after;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+after:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:schimba-acest-secret-cu-unul-puternic-de-cel-putin-32-bytes!!}
+      expiration-minutes: 1440
+  storage:
+    uploads-dir: ${UPLOADS_DIR:./uploads}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:8081,http://localhost:8787,http://127.0.0.1:5173,http://127.0.0.1:8080,http://127.0.0.1:8081}
+
+logging:
+  level:
+    org.hibernate.SQL: info
+    org.springframework.security: info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/after}
+    username: ${DB_USERNAME:after}
+    password: ${DB_PASSWORD:after}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

@@ -129,7 +129,10 @@
     font-feature-settings: "ss01", "cv11";
   }
 
-  h1, h2, h3, .font-display {
+  h1,
+  h2,
+  h3,
+  .font-display {
     font-family: var(--font-display);
     font-weight: 400;
     letter-spacing: -0.02em;
@@ -137,8 +140,12 @@
 }
 
 @layer utilities {
-  .text-balance { text-wrap: balance; }
-  .text-pretty { text-wrap: pretty; }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
 
   .bg-grain {
     background-image: radial-gradient(oklch(0.5 0.02 250 / 0.04) 1px, transparent 1px);
