@@ -16,6 +16,9 @@ import {
   CheckCircle2,
   Info,
   ShieldCheck,
+  Flag,
+  Globe2,
+  Languages,
 } from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { Button } from "@/components/ui/button";
@@ -24,13 +27,14 @@ export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
       { title: "Începe — After" },
-      { name: "description", content: "Spune-ne unde a avut loc decesul și îți arătăm exact ce ai de făcut, pas cu pas." },
+      { name: "description", content: "Spune-ne unde a avut loc decesul și cetățenia persoanei — îți arătăm exact ce ai de făcut." },
     ],
   }),
   component: Onboarding,
 });
 
 type PlaceId = "hospital" | "home" | "care" | "public" | "abroad";
+type NationalityId = "ro" | "eu" | "non_eu";
 
 type Step = {
   title: string;
@@ -52,6 +56,32 @@ const placeOptions: { id: PlaceId; label: string; sub: string; icon: typeof Home
   { id: "care", label: "Într-un centru de îngrijire", sub: "Centrul ajută cu actele medicale inițiale", icon: HeartPulse },
   { id: "public", label: "În spațiu public sau accident", sub: "Intervine Poliția și medicina legală", icon: Building2 },
   { id: "abroad", label: "În străinătate", sub: "Repatrierea cere pași suplimentari", icon: Plane },
+];
+
+const nationalityOptions: {
+  id: NationalityId;
+  label: string;
+  sub: string;
+  icon: typeof Flag;
+}[] = [
+  {
+    id: "ro",
+    label: "Cetățean român",
+    sub: "Procedura standard la Starea Civilă din România.",
+    icon: Flag,
+  },
+  {
+    id: "eu",
+    label: "Cetățean UE / SEE / Elveția",
+    sub: "Acte recunoscute fără apostilă, dar trebuie notificată ambasada și repatrierea poate fi cerută.",
+    icon: Globe2,
+  },
+  {
+    id: "non_eu",
+    label: "Cetățean non-UE",
+    sub: "Necesită notificare consulară, traducere legalizată și, de obicei, repatriere către țara de origine.",
+    icon: Languages,
+  },
 ];
 
 const guides: Record<PlaceId, Guide> = {
@@ -239,10 +269,78 @@ const guides: Record<PlaceId, Guide> = {
   },
 };
 
+// Pași suplimentari adăugați în funcție de cetățenie (când decesul a avut loc în România).
+const nationalityExtras: Record<NationalityId, Step[]> = {
+  ro: [],
+  eu: [
+    {
+      title: "Anunță ambasada/consulatul țării de cetățenie",
+      what:
+        "Misiunea diplomatică din România trebuie informată oficial. Ei pot emite un pașaport mortuar și pot ajuta familia din străinătate.",
+      who: "Ambasada sau consulatul țării de cetățenie acreditat în România.",
+      time: "În primele 24–48 de ore.",
+      next: "Cere-le în scris lista exactă a documentelor pentru repatriere sau înhumare locală.",
+    },
+    {
+      title: "Cere certificatul de deces multilingv (Convenția de la Viena 1976)",
+      what:
+        "La Starea Civilă poți cere forma extras multilingv — este recunoscut direct în țările UE/SEE, fără traducere sau apostilă.",
+      where: "Aceeași primărie unde se înregistrează decesul.",
+      next: "Este gratuit la prima eliberare și economisește săptămâni de proceduri.",
+    },
+    {
+      title: "Decide: înhumare în România sau repatriere",
+      what:
+        "Pentru repatriere în UE este nevoie de sicriu metalic sigilat, certificat de îmbălsămare și pașaport mortuar. O firmă funerară internațională se ocupă de logistică.",
+      time: "3–7 zile pentru repatrierea în UE.",
+    },
+  ],
+  non_eu: [
+    {
+      title: "Anunță urgent ambasada/consulatul țării de cetățenie",
+      what:
+        "Este obligatoriu. Multe state cer notificare consulară imediată și pot avea cerințe religioase sau legale specifice (ex. înhumare în max. 24h pentru anumite culte).",
+      who: "Ambasada sau consulatul țării de cetățenie.",
+      time: "În aceeași zi.",
+      next: "Cere lista exactă a documentelor și dacă acceptă înhumare locală sau cer repatriere.",
+    },
+    {
+      title: "Pregătește traducerea legalizată a certificatului de deces",
+      what:
+        "Certificatul românesc trebuie tradus de un traducător autorizat și legalizat la notar. Pentru țări non-UE, va fi nevoie și de apostilă (state Haga) sau supralegalizare la MAE + ambasadă.",
+      where: "Notar public + Ministerul Afacerilor Externe (Direcția Apostilă) + consulatul țării destinatare.",
+      time: "3–10 zile lucrătoare.",
+    },
+    {
+      title: "Organizează repatrierea către țara de origine",
+      what:
+        "Repatrierea este aproape întotdeauna cerută. Necesită pașaport mortuar emis de consulat, sicriu metalic sigilat, certificat de îmbălsămare și acordul companiei aeriene.",
+      time: "7–21 de zile, în funcție de țară și de documentația consulară.",
+      next: "Cere o firmă funerară cu experiență în repatrieri internaționale — costurile sunt 3.000–10.000 EUR.",
+    },
+    {
+      title: "Verifică obligațiile fiscale și de viză din România",
+      what:
+        "Dacă persoana avea permis de ședere, acesta trebuie predat la Inspectoratul General pentru Imigrări. Dacă avea bunuri sau cont bancar în România, succesiunea se deschide în România.",
+      where: "IGI județean și un notar din ultima localitate de domiciliu.",
+    },
+  ],
+};
+
 function Onboarding() {
   const [place, setPlace] = useState<PlaceId | null>(null);
-  const guide = place ? guides[place] : null;
+  const [nationality, setNationality] = useState<NationalityId | null>(null);
+
   const selected = place ? placeOptions.find((o) => o.id === place)! : null;
+  const selectedNat = nationality ? nationalityOptions.find((o) => o.id === nationality)! : null;
+  const baseGuide = place ? guides[place] : null;
+
+  // În străinătate cetățenia română este implicită pentru fluxul de repatriere — nu adăugăm pași.
+  const extras =
+    place && nationality && place !== "abroad" ? nationalityExtras[nationality] : [];
+  const steps = baseGuide ? [...baseGuide.steps, ...extras] : [];
+
+  const showGuide = place && (place === "abroad" || nationality);
 
   return (
     <PageShell hideFooter>
@@ -284,24 +382,22 @@ function Onboarding() {
 
               <div className="mt-8 flex items-start gap-3 rounded-2xl border border-border bg-surface/60 p-4 text-sm text-muted-foreground">
                 <ShieldCheck className="mt-0.5 h-4 w-4 text-primary" />
-                <p>
-                  Nu colectăm date personale în această etapă. Răspunsul rămâne doar pe acest dispozitiv.
-                </p>
+                <p>Nu colectăm date personale în această etapă. Răspunsul rămâne doar pe acest dispozitiv.</p>
               </div>
             </motion.div>
-          ) : (
+          ) : !showGuide ? (
             <motion.div
-              key={place}
-              initial={{ opacity: 0, y: 12 }}
+              key="nationality"
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.35 }}
             >
               <button
                 onClick={() => setPlace(null)}
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <ArrowLeft className="h-4 w-4" /> Schimbă răspunsul
+                <ArrowLeft className="h-4 w-4" /> Înapoi
               </button>
 
               <div className="mt-5 flex items-center gap-3">
@@ -312,50 +408,113 @@ function Onboarding() {
                 )}
                 <p className="text-sm uppercase tracking-wider text-muted-foreground">{selected?.label}</p>
               </div>
+
+              <h1 className="mt-3 font-display text-3xl md:text-4xl text-balance">
+                Ce cetățenie avea persoana decedată?
+              </h1>
+              <p className="mt-3 text-muted-foreground text-pretty">
+                Cetățenia schimbă procedura: notificarea consulară, traducerea actelor și posibila repatriere.
+                Pentru cetățenii străini există pași în plus pe care îi adăugăm automat în ghid.
+              </p>
+
+              <div className="mt-8 grid gap-3">
+                {nationalityOptions.map((o) => (
+                  <button
+                    key={o.id}
+                    onClick={() => setNationality(o.id)}
+                    className="group flex items-start gap-4 rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-foreground/30 hover:shadow-soft"
+                  >
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-muted text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                      <o.icon className="h-5 w-5" />
+                    </span>
+                    <span className="flex-1">
+                      <span className="block font-medium">{o.label}</span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground">{o.sub}</span>
+                    </span>
+                    <ArrowRight className="mt-3 h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`${place}-${nationality ?? "abroad"}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4 }}
+            >
+              <button
+                onClick={() => {
+                  if (place !== "abroad" && nationality) setNationality(null);
+                  else setPlace(null);
+                }}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" /> Schimbă răspunsul
+              </button>
+
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                {selected && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs uppercase tracking-wider text-primary">
+                    <selected.icon className="h-3.5 w-3.5" />
+                    {selected.label}
+                  </span>
+                )}
+                {selectedNat && place !== "abroad" && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs uppercase tracking-wider text-foreground/70">
+                    <selectedNat.icon className="h-3.5 w-3.5" />
+                    {selectedNat.label}
+                  </span>
+                )}
+              </div>
+
               <h1 className="mt-3 font-display text-3xl md:text-4xl text-balance">
                 Iată ce ai de făcut, pas cu pas.
               </h1>
 
               <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-surface p-5">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <p className="text-sm text-foreground/80 text-pretty">{guide!.intro}</p>
+                <p className="text-sm text-foreground/80 text-pretty">{baseGuide!.intro}</p>
               </div>
 
               <ol className="mt-8 space-y-4">
-                {guide!.steps.map((s, i) => (
-                  <motion.li
-                    key={s.title}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, delay: i * 0.05 }}
-                    className="rounded-2xl border border-border bg-card p-5 shadow-soft"
-                  >
-                    <div className="flex items-start gap-4">
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-foreground text-sm font-medium text-background">
-                        {i + 1}
-                      </span>
-                      <div className="flex-1">
-                        <h2 className="font-display text-xl leading-snug">{s.title}</h2>
-                        <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+                {steps.map((s, i) => {
+                  const isExtra = i >= baseGuide!.steps.length;
+                  return (
+                    <motion.li
+                      key={s.title}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, delay: i * 0.04 }}
+                      className="rounded-2xl border border-border bg-card p-5 shadow-soft"
+                    >
+                      <div className="flex items-start gap-4">
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-foreground text-sm font-medium text-background">
+                          {i + 1}
+                        </span>
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="font-display text-xl leading-snug">{s.title}</h2>
+                            {isExtra && (
+                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
+                                Pas pentru {selectedNat?.label.toLowerCase()}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
 
-                        <dl className="mt-4 grid gap-2 text-sm">
-                          {s.where && (
-                            <Row icon={MapPin} label="De unde">{s.where}</Row>
-                          )}
-                          {s.who && (
-                            <Row icon={Phone} label="Cine">{s.who}</Row>
-                          )}
-                          {s.time && (
-                            <Row icon={Clock} label="Când">{s.time}</Row>
-                          )}
-                          {s.next && (
-                            <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>
-                          )}
-                        </dl>
+                          <dl className="mt-4 grid gap-2 text-sm">
+                            {s.where && <Row icon={MapPin} label="De unde">{s.where}</Row>}
+                            {s.who && <Row icon={Phone} label="Cine">{s.who}</Row>}
+                            {s.time && <Row icon={Clock} label="Când">{s.time}</Row>}
+                            {s.next && <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>}
+                          </dl>
+                        </div>
                       </div>
-                    </div>
-                  </motion.li>
-                ))}
+                    </motion.li>
+                  );
+                })}
               </ol>
 
               <div className="mt-10 rounded-3xl border border-border bg-surface p-6 md:p-8">
