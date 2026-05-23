@@ -1,0 +1,29 @@
+# Render.com — deploiere gratuită cu un singur click.
+# 1. Conectează acest repo la Render (https://render.com/)
+# 2. Render va detecta acest fișier și va crea automat serviciul `after-api`.
+# 3. După deploy, copiază URL-ul (ex: https://after-api.onrender.com)
+#    și setează-l în aplicație: deschide site-ul → Setări API → lipește URL-ul.
+#
+# Notă: planul Free pune serviciul în „sleep” după 15 min de inactivitate;
+# prima cerere după sleep durează ~30 secunde să trezească instanța.
+
+services:
+  - type: web
+    name: after-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/translator/suggestions
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: UPLOADS_DIR
+        value: /tmp/uploads
+      # Lasă „*” cât experimentezi; după ce știi domeniul live, înlocuiește cu el.
+      - key: CORS_ORIGINS
+        value: "*"
