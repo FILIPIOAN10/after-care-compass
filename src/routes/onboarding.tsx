@@ -566,52 +566,147 @@ function Onboarding() {
               </div>
 
               <h1 className="mt-3 font-display text-3xl md:text-4xl text-balance">
-                Iată ce ai de făcut, pas cu pas.
+                Iată planul tău, în ordinea în care contează.
               </h1>
+              <p className="mt-3 text-sm text-muted-foreground text-pretty">
+                Bifează fiecare pas când îl închei. Plănuiește restul cu calm — nu există termene care să nu poată fi
+                explicate.
+              </p>
 
               <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-surface p-5">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p className="text-sm text-foreground/80 text-pretty">{baseGuide!.intro}</p>
               </div>
 
-              <ol className="mt-8 space-y-4">
-                {steps.map((s, i) => {
-                  const isExtra = i >= baseGuide!.steps.length;
-                  return (
-                    <motion.li
-                      key={s.title}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: i * 0.04 }}
-                      className="rounded-2xl border border-border bg-card p-5 shadow-soft"
-                    >
-                      <div className="flex items-start gap-4">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-foreground text-sm font-medium text-background">
-                          {i + 1}
-                        </span>
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h2 className="font-display text-xl leading-snug">{s.title}</h2>
-                            {isExtra && (
-                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
-                                Pas pentru {selectedNat?.label.toLowerCase()}
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+              {/* FAZA 1: până la funeralii */}
+              <section className="mt-10">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-primary">Faza 1 · Urgent</p>
+                    <h2 className="mt-1 font-display text-2xl">Până la funeralii</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Acești pași sunt obligatorii ca să poată avea loc înmormântarea.
+                    </p>
+                  </div>
+                  <div className="text-right text-xs text-muted-foreground">
+                    {beforeDoneCount} / {beforeSteps.length} pași încheiați
+                  </div>
+                </div>
 
-                          <dl className="mt-4 grid gap-2 text-sm">
-                            {s.where && <Row icon={MapPin} label="De unde">{s.where}</Row>}
-                            {s.who && <Row icon={Phone} label="Cine">{s.who}</Row>}
-                            {s.time && <Row icon={Clock} label="Când">{s.time}</Row>}
-                            {s.next && <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>}
-                          </dl>
+                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${beforeProgress}%` }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    className="h-full rounded-full bg-primary"
+                  />
+                </div>
+
+                <ol className="mt-6 space-y-4">
+                  {beforeSteps.map((s, i) => {
+                    const isExtra = i >= baseLen;
+                    const key = `b:${s.title}`;
+                    const isDone = done.has(key);
+                    return (
+                      <motion.li
+                        key={s.title}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: i * 0.04 }}
+                        className={`rounded-2xl border border-border bg-card p-5 shadow-soft transition-opacity ${isDone ? "opacity-60" : ""}`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <button
+                            onClick={() => toggleDone(key)}
+                            aria-pressed={isDone}
+                            aria-label={isDone ? "Marchează ca neîncheiat" : "Marchează ca încheiat"}
+                            className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-colors ${
+                              isDone
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+                            }`}
+                          >
+                            {isDone ? <CheckCircle2 className="h-4 w-4" /> : <span className="text-sm font-medium">{i + 1}</span>}
+                          </button>
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className={`font-display text-xl leading-snug ${isDone ? "line-through decoration-1" : ""}`}>
+                                {s.title}
+                              </h3>
+                              {isExtra && (
+                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
+                                  Pas pentru {selectedNat?.label.toLowerCase()}
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+
+                            <dl className="mt-4 grid gap-2 text-sm">
+                              {s.where && <Row icon={MapPin} label="De unde">{s.where}</Row>}
+                              {s.who && <Row icon={Phone} label="Cine">{s.who}</Row>}
+                              {s.time && <Row icon={Clock} label="Când">{s.time}</Row>}
+                              {s.next && <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>}
+                            </dl>
+                          </div>
                         </div>
-                      </div>
-                    </motion.li>
-                  );
-                })}
-              </ol>
+                      </motion.li>
+                    );
+                  })}
+                </ol>
+              </section>
+
+              {/* FAZA 2: după funeralii */}
+              <section className="mt-14">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Faza 2 · În următoarele luni</p>
+                <h2 className="mt-1 font-display text-2xl">După funeralii</h2>
+                <p className="mt-1 text-sm text-muted-foreground text-pretty">
+                  Mașină, conturi bancare, succesiune, pensii, utilități. Nu sunt urgente în primele zile — fă-le pe rând.
+                </p>
+
+                <ol className="mt-6 space-y-4">
+                  {postFuneralSteps.map((s, i) => {
+                    const key = `a:${s.title}`;
+                    const isDone = done.has(key);
+                    const Icon = s.icon;
+                    return (
+                      <motion.li
+                        key={s.title}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: i * 0.03 }}
+                        className={`rounded-2xl border border-border bg-card p-5 shadow-soft transition-opacity ${isDone ? "opacity-60" : ""}`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <button
+                            onClick={() => toggleDone(key)}
+                            aria-pressed={isDone}
+                            aria-label={isDone ? "Marchează ca neîncheiat" : "Marchează ca încheiat"}
+                            className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-colors ${
+                              isDone
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-muted text-foreground/70 hover:border-foreground/40 hover:text-foreground"
+                            }`}
+                          >
+                            {isDone ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                          </button>
+                          <div className="flex-1">
+                            <h3 className={`font-display text-lg leading-snug ${isDone ? "line-through decoration-1" : ""}`}>
+                              {s.title}
+                            </h3>
+                            <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+                            <dl className="mt-4 grid gap-2 text-sm">
+                              {s.where && <Row icon={MapPin} label="De unde">{s.where}</Row>}
+                              {s.time && <Row icon={Clock} label="Când">{s.time}</Row>}
+                              {s.next && <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>}
+                            </dl>
+                          </div>
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </ol>
+              </section>
+
 
               <div className="mt-10 rounded-3xl border border-border bg-surface p-6 md:p-8">
                 <div className="flex items-start gap-4">
