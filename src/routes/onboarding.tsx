@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
@@ -19,6 +19,13 @@ import {
   Flag,
   Globe2,
   Languages,
+  Car,
+  Landmark,
+  Banknote,
+  Briefcase,
+  Plug,
+  Scale,
+  Heart,
 } from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { Button } from "@/components/ui/button";
@@ -327,9 +334,91 @@ const nationalityExtras: Record<NationalityId, Step[]> = {
   ],
 };
 
+// Pași după ce funeraliile au avut loc — comuni, indiferent de locul decesului.
+// Ordonați aproximativ după urgență (primele zile → primele luni).
+type PostStep = Step & { icon: typeof FileText };
+const postFuneralSteps: PostStep[] = [
+  {
+    icon: Banknote,
+    title: "Cere ajutorul de înmormântare",
+    what:
+      "Sumă forfetară plătită familiei pentru a acoperi parțial costurile funerare. În 2025 valoarea este în jur de 8.620 lei pentru pensionari.",
+    where: "Casa Județeană de Pensii (dacă era pensionar) sau angajator (dacă era salariat).",
+    time: "Cerere în maximum 3 ani de la deces, dar ideal în prima lună.",
+    next: "Ai nevoie de: certificat de deces (copie), CI solicitant, factură funerară, dovadă rudenie.",
+  },
+  {
+    icon: Briefcase,
+    title: "Anunță angajatorul sau Casa de Pensii",
+    what:
+      "Dacă era salariat, angajatorul oprește plata salariului și eliberează adeverințe pentru succesiune. Dacă era pensionar, pensia se sistează de la luna următoare.",
+    where: "Departamentul HR sau Casa Județeană de Pensii.",
+    time: "În primele 5 zile lucrătoare.",
+  },
+  {
+    icon: Heart,
+    title: "Verifică dreptul la pensie de urmaș",
+    what:
+      "Soțul/soția, copiii minori sau elevii/studenții până la 26 de ani pot avea drept la pensie de urmaș. Se calculează ca procent din pensia decedatului.",
+    where: "Casa Județeană de Pensii.",
+    next: "Dosar: certificat deces, certificate naștere copii, adeverințe școlare, certificat căsătorie.",
+  },
+  {
+    icon: FileText,
+    title: "Anulează cartea de identitate și pașaportul",
+    what:
+      "Actele de identitate se predau Stării Civile odată cu certificatul medical, dar pașaportul rămâne la familie. Trebuie anulat separat ca să nu fie folosit fraudulos.",
+    where: "Direcția de Evidență a Persoanelor (CI) și Serviciul Pașapoarte.",
+  },
+  {
+    icon: Scale,
+    title: "Deschide succesiunea la notar",
+    what:
+      "Stabilește oficial moștenitorii și permite transferul proprietăților (casă, teren, conturi, mașină). Cu cât e deschisă mai repede, cu atât eviți penalități fiscale.",
+    where: "Notar public din ultima localitate de domiciliu a persoanei decedate.",
+    time: "Ideal în primele 2 luni. Obligatoriu în maximum 2 ani pentru a evita taxa de 1% pe valoarea moștenirii.",
+    next: "Acte necesare: certificat de deces, certificate naștere/căsătorie moștenitori, acte proprietăți, extrase cont.",
+  },
+  {
+    icon: Car,
+    title: "Transferă sau radiază autovehiculul",
+    what:
+      "Mașina nu poate circula legal pe numele unei persoane decedate. După certificatul de moștenitor, se face transferul sau radierea la DRPCIV.",
+    where: "Serviciul Înmatriculări (DRPCIV) din județul de domiciliu.",
+    time: "În 30 de zile de la finalizarea succesiunii.",
+    next: "Anunță și asigurătorul RCA — polița poate fi rambursată proporțional.",
+  },
+  {
+    icon: Landmark,
+    title: "Anunță băncile și blochează conturile",
+    what:
+      "Conturile se blochează automat la cerere, până la finalizarea succesiunii. Cardurile trebuie distruse. Verifică dacă existau credite cu asigurare de viață — pot fi acoperite.",
+    where: "Sucursala fiecărei bănci unde avea conturi.",
+    next: "Cere extras de cont la data decesului — îți va trebui la notar.",
+  },
+  {
+    icon: Plug,
+    title: "Actualizează contractele de utilități și abonamente",
+    what:
+      "Energie, gaz, apă, internet, telefon, Netflix — pot fi transferate pe numele moștenitorului sau anulate. Multe se pot face online cu certificatul de deces.",
+    where: "Furnizorii respectivi.",
+    time: "În primele 1–3 luni.",
+  },
+];
+
+
 function Onboarding() {
   const [place, setPlace] = useState<PlaceId | null>(null);
   const [nationality, setNationality] = useState<NationalityId | null>(null);
+  const [done, setDone] = useState<Set<string>>(new Set());
+
+  const toggleDone = (key: string) =>
+    setDone((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
 
   const selected = place ? placeOptions.find((o) => o.id === place)! : null;
   const selectedNat = nationality ? nationalityOptions.find((o) => o.id === nationality)! : null;
@@ -338,7 +427,14 @@ function Onboarding() {
   // În străinătate cetățenia română este implicită pentru fluxul de repatriere — nu adăugăm pași.
   const extras =
     place && nationality && place !== "abroad" ? nationalityExtras[nationality] : [];
-  const steps = baseGuide ? [...baseGuide.steps, ...extras] : [];
+  const beforeSteps = baseGuide ? [...baseGuide.steps, ...extras] : [];
+  const baseLen = baseGuide?.steps.length ?? 0;
+
+  const beforeDoneCount = useMemo(
+    () => beforeSteps.filter((s) => done.has(`b:${s.title}`)).length,
+    [beforeSteps, done],
+  );
+  const beforeProgress = beforeSteps.length ? Math.round((beforeDoneCount / beforeSteps.length) * 100) : 0;
 
   const showGuide = place && (place === "abroad" || nationality);
 
@@ -470,52 +566,147 @@ function Onboarding() {
               </div>
 
               <h1 className="mt-3 font-display text-3xl md:text-4xl text-balance">
-                Iată ce ai de făcut, pas cu pas.
+                Iată planul tău, în ordinea în care contează.
               </h1>
+              <p className="mt-3 text-sm text-muted-foreground text-pretty">
+                Bifează fiecare pas când îl închei. Plănuiește restul cu calm — nu există termene care să nu poată fi
+                explicate.
+              </p>
 
               <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-surface p-5">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p className="text-sm text-foreground/80 text-pretty">{baseGuide!.intro}</p>
               </div>
 
-              <ol className="mt-8 space-y-4">
-                {steps.map((s, i) => {
-                  const isExtra = i >= baseGuide!.steps.length;
-                  return (
-                    <motion.li
-                      key={s.title}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: i * 0.04 }}
-                      className="rounded-2xl border border-border bg-card p-5 shadow-soft"
-                    >
-                      <div className="flex items-start gap-4">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-foreground text-sm font-medium text-background">
-                          {i + 1}
-                        </span>
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h2 className="font-display text-xl leading-snug">{s.title}</h2>
-                            {isExtra && (
-                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
-                                Pas pentru {selectedNat?.label.toLowerCase()}
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+              {/* FAZA 1: până la funeralii */}
+              <section className="mt-10">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-primary">Faza 1 · Urgent</p>
+                    <h2 className="mt-1 font-display text-2xl">Până la funeralii</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Acești pași sunt obligatorii ca să poată avea loc înmormântarea.
+                    </p>
+                  </div>
+                  <div className="text-right text-xs text-muted-foreground">
+                    {beforeDoneCount} / {beforeSteps.length} pași încheiați
+                  </div>
+                </div>
 
-                          <dl className="mt-4 grid gap-2 text-sm">
-                            {s.where && <Row icon={MapPin} label="De unde">{s.where}</Row>}
-                            {s.who && <Row icon={Phone} label="Cine">{s.who}</Row>}
-                            {s.time && <Row icon={Clock} label="Când">{s.time}</Row>}
-                            {s.next && <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>}
-                          </dl>
+                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${beforeProgress}%` }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    className="h-full rounded-full bg-primary"
+                  />
+                </div>
+
+                <ol className="mt-6 space-y-4">
+                  {beforeSteps.map((s, i) => {
+                    const isExtra = i >= baseLen;
+                    const key = `b:${s.title}`;
+                    const isDone = done.has(key);
+                    return (
+                      <motion.li
+                        key={s.title}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: i * 0.04 }}
+                        className={`rounded-2xl border border-border bg-card p-5 shadow-soft transition-opacity ${isDone ? "opacity-60" : ""}`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <button
+                            onClick={() => toggleDone(key)}
+                            aria-pressed={isDone}
+                            aria-label={isDone ? "Marchează ca neîncheiat" : "Marchează ca încheiat"}
+                            className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-colors ${
+                              isDone
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+                            }`}
+                          >
+                            {isDone ? <CheckCircle2 className="h-4 w-4" /> : <span className="text-sm font-medium">{i + 1}</span>}
+                          </button>
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className={`font-display text-xl leading-snug ${isDone ? "line-through decoration-1" : ""}`}>
+                                {s.title}
+                              </h3>
+                              {isExtra && (
+                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
+                                  Pas pentru {selectedNat?.label.toLowerCase()}
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+
+                            <dl className="mt-4 grid gap-2 text-sm">
+                              {s.where && <Row icon={MapPin} label="De unde">{s.where}</Row>}
+                              {s.who && <Row icon={Phone} label="Cine">{s.who}</Row>}
+                              {s.time && <Row icon={Clock} label="Când">{s.time}</Row>}
+                              {s.next && <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>}
+                            </dl>
+                          </div>
                         </div>
-                      </div>
-                    </motion.li>
-                  );
-                })}
-              </ol>
+                      </motion.li>
+                    );
+                  })}
+                </ol>
+              </section>
+
+              {/* FAZA 2: după funeralii */}
+              <section className="mt-14">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Faza 2 · În următoarele luni</p>
+                <h2 className="mt-1 font-display text-2xl">După funeralii</h2>
+                <p className="mt-1 text-sm text-muted-foreground text-pretty">
+                  Mașină, conturi bancare, succesiune, pensii, utilități. Nu sunt urgente în primele zile — fă-le pe rând.
+                </p>
+
+                <ol className="mt-6 space-y-4">
+                  {postFuneralSteps.map((s, i) => {
+                    const key = `a:${s.title}`;
+                    const isDone = done.has(key);
+                    const Icon = s.icon;
+                    return (
+                      <motion.li
+                        key={s.title}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: i * 0.03 }}
+                        className={`rounded-2xl border border-border bg-card p-5 shadow-soft transition-opacity ${isDone ? "opacity-60" : ""}`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <button
+                            onClick={() => toggleDone(key)}
+                            aria-pressed={isDone}
+                            aria-label={isDone ? "Marchează ca neîncheiat" : "Marchează ca încheiat"}
+                            className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-colors ${
+                              isDone
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-muted text-foreground/70 hover:border-foreground/40 hover:text-foreground"
+                            }`}
+                          >
+                            {isDone ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                          </button>
+                          <div className="flex-1">
+                            <h3 className={`font-display text-lg leading-snug ${isDone ? "line-through decoration-1" : ""}`}>
+                              {s.title}
+                            </h3>
+                            <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+                            <dl className="mt-4 grid gap-2 text-sm">
+                              {s.where && <Row icon={MapPin} label="De unde">{s.where}</Row>}
+                              {s.time && <Row icon={Clock} label="Când">{s.time}</Row>}
+                              {s.next && <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>}
+                            </dl>
+                          </div>
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </ol>
+              </section>
+
 
               <div className="mt-10 rounded-3xl border border-border bg-surface p-6 md:p-8">
                 <div className="flex items-start gap-4">
