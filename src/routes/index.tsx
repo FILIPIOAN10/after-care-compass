@@ -163,7 +163,7 @@ function Landing() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">
-              <Link to="/onboarding">
+              <Link to="/intake">
                 <Button size="lg" variant="secondary" className="h-12 rounded-full px-6 text-base">
                   Începe ghidarea
                 </Button>
