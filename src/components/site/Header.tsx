@@ -1,6 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+import { LogOut } from "lucide-react";
 
 const nav = [
   { to: "/dashboard", label: "Planul meu" },
@@ -10,6 +12,9 @@ const nav = [
 ];
 
 export function Header() {
+  const auth = useAuth();
+  const router = useRouter();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
@@ -27,12 +32,36 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link to="/onboarding" className="hidden sm:block">
-            <Button variant="ghost" className="rounded-full">Începe</Button>
-          </Link>
-          <Link to="/security">
-            <Button variant="outline" className="rounded-full">Autentificare</Button>
-          </Link>
+          {auth.isAuthenticated ? (
+            <>
+              <span className="hidden text-xs text-muted-foreground sm:block">
+                {auth.user?.fullName}
+              </span>
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={() => {
+                  auth.logout();
+                  router.navigate({ to: "/" });
+                }}
+              >
+                <LogOut className="mr-1.5 h-4 w-4" /> Ieși
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/onboarding" className="hidden sm:block">
+                <Button variant="ghost" className="rounded-full">
+                  Începe
+                </Button>
+              </Link>
+              <Link to="/security">
+                <Button variant="outline" className="rounded-full">
+                  Autentificare
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
