@@ -334,6 +334,79 @@ const nationalityExtras: Record<NationalityId, Step[]> = {
   ],
 };
 
+// Pași după ce funeraliile au avut loc — comuni, indiferent de locul decesului.
+// Ordonați aproximativ după urgență (primele zile → primele luni).
+type PostStep = Step & { icon: typeof FileText };
+const postFuneralSteps: PostStep[] = [
+  {
+    icon: Banknote,
+    title: "Cere ajutorul de înmormântare",
+    what:
+      "Sumă forfetară plătită familiei pentru a acoperi parțial costurile funerare. În 2025 valoarea este în jur de 8.620 lei pentru pensionari.",
+    where: "Casa Județeană de Pensii (dacă era pensionar) sau angajator (dacă era salariat).",
+    time: "Cerere în maximum 3 ani de la deces, dar ideal în prima lună.",
+    next: "Ai nevoie de: certificat de deces (copie), CI solicitant, factură funerară, dovadă rudenie.",
+  },
+  {
+    icon: Briefcase,
+    title: "Anunță angajatorul sau Casa de Pensii",
+    what:
+      "Dacă era salariat, angajatorul oprește plata salariului și eliberează adeverințe pentru succesiune. Dacă era pensionar, pensia se sistează de la luna următoare.",
+    where: "Departamentul HR sau Casa Județeană de Pensii.",
+    time: "În primele 5 zile lucrătoare.",
+  },
+  {
+    icon: Heart,
+    title: "Verifică dreptul la pensie de urmaș",
+    what:
+      "Soțul/soția, copiii minori sau elevii/studenții până la 26 de ani pot avea drept la pensie de urmaș. Se calculează ca procent din pensia decedatului.",
+    where: "Casa Județeană de Pensii.",
+    next: "Dosar: certificat deces, certificate naștere copii, adeverințe școlare, certificat căsătorie.",
+  },
+  {
+    icon: FileText,
+    title: "Anulează cartea de identitate și pașaportul",
+    what:
+      "Actele de identitate se predau Stării Civile odată cu certificatul medical, dar pașaportul rămâne la familie. Trebuie anulat separat ca să nu fie folosit fraudulos.",
+    where: "Direcția de Evidență a Persoanelor (CI) și Serviciul Pașapoarte.",
+  },
+  {
+    icon: Scale,
+    title: "Deschide succesiunea la notar",
+    what:
+      "Stabilește oficial moștenitorii și permite transferul proprietăților (casă, teren, conturi, mașină). Cu cât e deschisă mai repede, cu atât eviți penalități fiscale.",
+    where: "Notar public din ultima localitate de domiciliu a persoanei decedate.",
+    time: "Ideal în primele 2 luni. Obligatoriu în maximum 2 ani pentru a evita taxa de 1% pe valoarea moștenirii.",
+    next: "Acte necesare: certificat de deces, certificate naștere/căsătorie moștenitori, acte proprietăți, extrase cont.",
+  },
+  {
+    icon: Car,
+    title: "Transferă sau radiază autovehiculul",
+    what:
+      "Mașina nu poate circula legal pe numele unei persoane decedate. După certificatul de moștenitor, se face transferul sau radierea la DRPCIV.",
+    where: "Serviciul Înmatriculări (DRPCIV) din județul de domiciliu.",
+    time: "În 30 de zile de la finalizarea succesiunii.",
+    next: "Anunță și asigurătorul RCA — polița poate fi rambursată proporțional.",
+  },
+  {
+    icon: Landmark,
+    title: "Anunță băncile și blochează conturile",
+    what:
+      "Conturile se blochează automat la cerere, până la finalizarea succesiunii. Cardurile trebuie distruse. Verifică dacă existau credite cu asigurare de viață — pot fi acoperite.",
+    where: "Sucursala fiecărei bănci unde avea conturi.",
+    next: "Cere extras de cont la data decesului — îți va trebui la notar.",
+  },
+  {
+    icon: Plug,
+    title: "Actualizează contractele de utilități și abonamente",
+    what:
+      "Energie, gaz, apă, internet, telefon, Netflix — pot fi transferate pe numele moștenitorului sau anulate. Multe se pot face online cu certificatul de deces.",
+    where: "Furnizorii respectivi.",
+    time: "În primele 1–3 luni.",
+  },
+];
+
+
 function Onboarding() {
   const [place, setPlace] = useState<PlaceId | null>(null);
   const [nationality, setNationality] = useState<NationalityId | null>(null);
