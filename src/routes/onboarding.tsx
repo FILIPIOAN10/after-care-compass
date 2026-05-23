@@ -410,6 +410,15 @@ const postFuneralSteps: PostStep[] = [
 function Onboarding() {
   const [place, setPlace] = useState<PlaceId | null>(null);
   const [nationality, setNationality] = useState<NationalityId | null>(null);
+  const [done, setDone] = useState<Set<string>>(new Set());
+
+  const toggleDone = (key: string) =>
+    setDone((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
 
   const selected = place ? placeOptions.find((o) => o.id === place)! : null;
   const selectedNat = nationality ? nationalityOptions.find((o) => o.id === nationality)! : null;
@@ -418,7 +427,14 @@ function Onboarding() {
   // În străinătate cetățenia română este implicită pentru fluxul de repatriere — nu adăugăm pași.
   const extras =
     place && nationality && place !== "abroad" ? nationalityExtras[nationality] : [];
-  const steps = baseGuide ? [...baseGuide.steps, ...extras] : [];
+  const beforeSteps = baseGuide ? [...baseGuide.steps, ...extras] : [];
+  const baseLen = baseGuide?.steps.length ?? 0;
+
+  const beforeDoneCount = useMemo(
+    () => beforeSteps.filter((s) => done.has(`b:${s.title}`)).length,
+    [beforeSteps, done],
+  );
+  const beforeProgress = beforeSteps.length ? Math.round((beforeDoneCount / beforeSteps.length) * 100) : 0;
 
   const showGuide = place && (place === "abroad" || nationality);
 
