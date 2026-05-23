@@ -1,183 +1,413 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Upload, Hospital, Home, Plane, HeartPulse, FileText, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Hospital,
+  Home,
+  Plane,
+  HeartPulse,
+  Building2,
+  FileText,
+  MapPin,
+  Clock,
+  Phone,
+  CheckCircle2,
+  Info,
+  ShieldCheck,
+} from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Începe — After" }, { name: "description", content: "Un chestionar scurt și blând pentru a-ți construi planul." }] }),
+  head: () => ({
+    meta: [
+      { title: "Începe — After" },
+      { name: "description", content: "Spune-ne unde a avut loc decesul și îți arătăm exact ce ai de făcut, pas cu pas." },
+    ],
+  }),
   component: Onboarding,
 });
 
-const placeOptions = [
-  { id: "hospital", label: "La spital", icon: Hospital },
-  { id: "home", label: "Acasă", icon: Home },
-  { id: "abroad", label: "În străinătate", icon: Plane },
-  { id: "care", label: "Într-un centru de îngrijire", icon: HeartPulse },
+type PlaceId = "hospital" | "home" | "care" | "public" | "abroad";
+
+type Step = {
+  title: string;
+  what: string;
+  where?: string;
+  who?: string;
+  time?: string;
+  next?: string;
+};
+
+type Guide = {
+  intro: string;
+  steps: Step[];
+};
+
+const placeOptions: { id: PlaceId; label: string; sub: string; icon: typeof Home }[] = [
+  { id: "hospital", label: "La spital", sub: "Personalul medical eliberează certificatul constatator", icon: Hospital },
+  { id: "home", label: "Acasă", sub: "Trebuie chemat medicul de familie sau ambulanța", icon: Home },
+  { id: "care", label: "Într-un centru de îngrijire", sub: "Centrul ajută cu actele medicale inițiale", icon: HeartPulse },
+  { id: "public", label: "În spațiu public sau accident", sub: "Intervine Poliția și medicina legală", icon: Building2 },
+  { id: "abroad", label: "În străinătate", sub: "Repatrierea cere pași suplimentari", icon: Plane },
 ];
 
-const steps = ["Locul", "Documente", "Detalii", "Context"] as const;
+const guides: Record<PlaceId, Guide> = {
+  hospital: {
+    intro:
+      "Spitalul se ocupă de constatarea medicală. Tu trebuie să iei două documente de la ei și să mergi cu ele la Starea Civilă.",
+    steps: [
+      {
+        title: "Cere Certificatul medical constatator al decesului",
+        what:
+          "Este formularul tipizat completat de medicul curant. Fără el nu se poate elibera certificatul de deces.",
+        where: "De la secția unde s-a aflat pacientul sau de la registratura spitalului.",
+        who: "Medicul curant sau medicul de gardă.",
+        time: "În aceeași zi sau a doua zi.",
+        next: "Verifică să aibă semnătură, parafă și ștampila spitalului.",
+      },
+      {
+        title: "Ridică actele personale ale persoanei decedate",
+        what: "Cartea de identitate (originalul) și, dacă există, certificatul de naștere și de căsătorie.",
+        where: "De la asistenta-șefă a secției.",
+        time: "Imediat.",
+        next: "Le vei preda la Starea Civilă împreună cu certificatul medical.",
+      },
+      {
+        title: "Mergi la Starea Civilă din primăria locului decesului",
+        what:
+          "Aici se eliberează Certificatul de deces — documentul oficial cu care faci toate celelalte demersuri.",
+        where: "Primăria sectorului / localității unde a survenit decesul (nu unde locuia persoana).",
+        time: "În maximum 3 zile de la deces.",
+        next: "Vei primi gratuit Certificatul de deces și Adeverința de înhumare/incinerare.",
+      },
+      {
+        title: "Contactează o firmă de servicii funerare",
+        what: "Ei se ocupă de transport, sicriu, organizarea înmormântării și pot prelua și demersurile la Starea Civilă.",
+        time: "Cât mai repede — multe lucruri depind de programarea lor.",
+        next: "Cere o ofertă scrisă cu toate costurile înainte să semnezi.",
+      },
+    ],
+  },
+  home: {
+    intro:
+      "Acasă nu există un medic care să constate decesul automat. Primul pas este să fie chemată o persoană autorizată să-l constate.",
+    steps: [
+      {
+        title: "Sună 112 sau medicul de familie",
+        what:
+          "Dacă decesul a fost așteptat (boală cunoscută), poate veni medicul de familie. În rest, sună la 112 și vor trimite un echipaj.",
+        who: "Medicul de familie, ambulanța (112) sau Poliția.",
+        time: "Imediat — nu mutați persoana până nu vine cineva autorizat.",
+        next: "Vor stabili dacă e necesară autopsia sau dacă se poate elibera direct certificatul constatator.",
+      },
+      {
+        title: "Obține Certificatul medical constatator al decesului",
+        what:
+          "Dacă medicul de familie cunoștea boala, el îl poate elibera direct. Altfel, corpul este preluat de Medicina Legală (INML / SML) și certificatul vine de acolo după examinare.",
+        where: "Cabinetul medicului de familie sau Serviciul Județean de Medicină Legală.",
+        time: "1–3 zile, în funcție de caz.",
+        next: "Fără acest document nu poți obține Certificatul de deces.",
+      },
+      {
+        title: "Pregătește actele persoanei decedate",
+        what: "Carte de identitate (original), certificat de naștere, certificat de căsătorie dacă era cazul.",
+        where: "Din locuință.",
+        next: "Le vei depune la Starea Civilă.",
+      },
+      {
+        title: "Înregistrează decesul la Starea Civilă",
+        what:
+          "La primăria localității/sectorului unde s-a produs decesul. Aici primești Certificatul de deces și Adeverința de înhumare.",
+        where: "Primăria locului decesului.",
+        time: "În maximum 3 zile lucrătoare de la deces.",
+        next: "Documentele se eliberează gratuit, pe loc.",
+      },
+      {
+        title: "Contactează o firmă de servicii funerare",
+        what: "Pentru transport, pregătire și înmormântare. Pot prelua și formalitățile la Starea Civilă în numele tău.",
+        time: "Cât mai curând.",
+      },
+    ],
+  },
+  care: {
+    intro:
+      "Centrul de îngrijire are personal medical care va face primii pași. Întreabă-i ce au făcut deja — adesea ridici doar actele finale.",
+    steps: [
+      {
+        title: "Vorbește cu administratorul centrului",
+        what:
+          "Ei îți spun ce medic a constatat decesul și unde se găsește Certificatul medical constatator.",
+        time: "În aceeași zi.",
+      },
+      {
+        title: "Ridică Certificatul medical constatator",
+        what: "Eliberat fie de medicul centrului, fie de un medic chemat la fața locului.",
+        where: "De la administrația centrului.",
+        next: "Verifică să fie semnat, parafat și ștampilat.",
+      },
+      {
+        title: "Mergi la Starea Civilă pentru Certificatul de deces",
+        what: "La primăria localității unde se află centrul de îngrijire.",
+        time: "În maximum 3 zile de la deces.",
+        next: "Vei primi gratuit certificatul oficial și Adeverința de înhumare.",
+      },
+      {
+        title: "Organizează transportul cu o firmă funerară",
+        what: "Centrul nu se ocupă de transportul către capela sau locul înmormântării.",
+      },
+    ],
+  },
+  public: {
+    intro:
+      "În aceste cazuri intervin automat Poliția și medicina legală. Tu trebuie să aștepți să-ți comunice ei pașii — nu poți accelera procesul.",
+    steps: [
+      {
+        title: "Așteaptă să fii contactat de Poliție",
+        what:
+          "Te vor suna pentru identificare și pentru a-ți cere acte. Corpul este preluat automat la Medicina Legală (INML / SML).",
+        who: "Poliția secției pe raza căreia a avut loc evenimentul.",
+        time: "În câteva ore până la 1 zi.",
+      },
+      {
+        title: "Mergi pentru identificare și depunerea actelor",
+        what:
+          "Iei cu tine cartea ta de identitate și, dacă ai, actele persoanei decedate. Vei semna un proces-verbal de identificare.",
+        where: "Sediul Poliției sau Serviciul de Medicină Legală.",
+      },
+      {
+        title: "Așteaptă rezultatul autopsiei",
+        what:
+          "Pentru deces violent, accident sau cauză neclară, autopsia este obligatorie. Fără raportul ei nu se eliberează certificatul constatator.",
+        time: "De obicei 3–10 zile, uneori mai mult.",
+      },
+      {
+        title: "Ridică Certificatul medical constatator",
+        what: "Eliberat de Medicina Legală după finalizarea autopsiei.",
+        where: "Serviciul Județean de Medicină Legală (sau INML pentru București).",
+        next: "Cu el mergi la Starea Civilă pentru Certificatul de deces.",
+      },
+      {
+        title: "Înregistrează decesul la Starea Civilă",
+        what: "La primăria locului unde a survenit decesul.",
+        time: "În 3 zile de la eliberarea certificatului constatator.",
+      },
+    ],
+  },
+  abroad: {
+    intro:
+      "Procedura este mai lungă pentru că implică autoritățile țării respective și ambasada/consulatul României. Așteaptă-te la 1–3 săptămâni până la repatriere.",
+    steps: [
+      {
+        title: "Contactează imediat Ambasada sau Consulatul României",
+        what:
+          "Ei te ghidează prin procedura locală, te ajută cu traducerea actelor și cu repatrierea.",
+        who: "Misiunea diplomatică a României din țara respectivă.",
+        time: "Sună în aceeași zi — programul lor de urgență e non-stop.",
+      },
+      {
+        title: "Obține certificatul de deces local",
+        what:
+          "Eliberat de autoritatea civilă a țării unde s-a produs decesul. Va fi în limba locală.",
+        where: "Autoritățile locale (echivalentul Stării Civile).",
+      },
+      {
+        title: "Cere Apostila de la Haga sau supralegalizarea",
+        what:
+          "Pentru ca actul să fie recunoscut în România, are nevoie de apostilă (pentru țările semnatare ale Convenției de la Haga) sau de supralegalizare.",
+        where: "Autoritatea desemnată din țara respectivă.",
+      },
+      {
+        title: "Tradu actul în limba română",
+        what: "Traducere legalizată la un notar din România sau la consulat.",
+      },
+      {
+        title: "Organizează repatrierea sau înhumarea locală",
+        what:
+          "O firmă specializată internațională se ocupă de transport. Costul poate fi 2.000–8.000 EUR în funcție de țară.",
+        time: "5–14 zile de obicei.",
+      },
+      {
+        title: "Înregistrează decesul în România",
+        what:
+          "Cu actul tradus și apostilat, mergi la Starea Civilă din ultima localitate de domiciliu pentru transcriere.",
+        where: "Primăria de domiciliu a persoanei decedate.",
+      },
+    ],
+  },
+};
 
 function Onboarding() {
-  const [step, setStep] = useState(0);
-  const [place, setPlace] = useState<string>("");
-
-  const next = () => setStep((s) => Math.min(s + 1, steps.length - 1));
-  const back = () => setStep((s) => Math.max(s - 1, 0));
-  const progress = ((step + 1) / steps.length) * 100;
+  const [place, setPlace] = useState<PlaceId | null>(null);
+  const guide = place ? guides[place] : null;
+  const selected = place ? placeOptions.find((o) => o.id === place)! : null;
 
   return (
     <PageShell hideFooter>
-      <div className="mx-auto max-w-2xl px-5 py-12 md:py-20">
-        {/* progress */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Pasul {step + 1} din {steps.length}</span>
-            <span>{steps[step]}</span>
-          </div>
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <motion.div
-              className="h-full rounded-full bg-primary"
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-        </div>
-
+      <div className="mx-auto max-w-3xl px-5 py-12 md:py-16">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.35 }}
-          >
-            {step === 0 && (
-              <div>
-                <p className="text-sm text-muted-foreground">Condoleanțele noastre pentru pierderea ta.</p>
-                <h1 className="mt-2 font-display text-3xl md:text-4xl">Unde a avut loc decesul?</h1>
-                <p className="mt-3 text-muted-foreground">Ne ajută să pregătim documentele potrivite. Poți schimba mai târziu.</p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {placeOptions.map((o) => {
-                    const selected = place === o.id;
-                    return (
-                      <button
-                        key={o.id}
-                        onClick={() => setPlace(o.id)}
-                        className={`group flex items-center gap-4 rounded-2xl border p-5 text-left transition-all ${
-                          selected
-                            ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                            : "border-border bg-card hover:border-foreground/20"
-                        }`}
-                      >
-                        <span className={`grid h-11 w-11 place-items-center rounded-xl ${selected ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
-                          <o.icon className="h-5 w-5" />
-                        </span>
-                        <span className="font-medium">{o.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          {!place ? (
+            <motion.div
+              key="picker"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}
+            >
+              <p className="text-sm text-muted-foreground">Condoleanțele noastre pentru pierderea ta.</p>
+              <h1 className="mt-2 font-display text-3xl md:text-4xl">Unde a avut loc decesul?</h1>
+              <p className="mt-3 text-muted-foreground text-pretty">
+                Răspunsul ne ajută să-ți arătăm exact ce ai de făcut acum, de unde să iei fiecare document și ce urmează după.
+                Nu e nevoie să-ți faci cont.
+              </p>
 
-            {step === 1 && (
-              <div>
-                <h1 className="font-display text-3xl md:text-4xl">Încarcă ce ai la îndemână</h1>
-                <p className="mt-3 text-muted-foreground">Adaugă documentele primite. Le citim noi, ca să nu mai retastezi nimic.</p>
-                <div className="mt-8 space-y-3">
-                  {["Certificat de deces", "Carte de identitate", "Alte documente justificative"].map((d) => (
-                    <label key={d} className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-dashed border-border bg-card p-5 transition-colors hover:border-foreground/30">
-                      <div className="flex items-center gap-4">
-                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-muted text-muted-foreground">
-                          <FileText className="h-5 w-5" />
-                        </span>
-                        <div>
-                          <p className="font-medium">{d}</p>
-                          <p className="text-xs text-muted-foreground">PDF, JPG sau HEIC · până la 20MB</p>
-                        </div>
-                      </div>
-                      <span className="inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-xs">
-                        <Upload className="h-3.5 w-3.5" /> Adaugă fișier
-                      </span>
-                      <input type="file" className="sr-only" />
-                    </label>
-                  ))}
-                </div>
-                <p className="mt-6 text-xs text-muted-foreground">Poți sări peste și adăuga documentele mai târziu din Centrul de documente.</p>
+              <div className="mt-8 grid gap-3">
+                {placeOptions.map((o) => (
+                  <button
+                    key={o.id}
+                    onClick={() => setPlace(o.id)}
+                    className="group flex items-start gap-4 rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-foreground/30 hover:shadow-soft"
+                  >
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-muted text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                      <o.icon className="h-5 w-5" />
+                    </span>
+                    <span className="flex-1">
+                      <span className="block font-medium">{o.label}</span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground">{o.sub}</span>
+                    </span>
+                    <ArrowRight className="mt-3 h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                ))}
               </div>
-            )}
 
-            {step === 2 && (
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
-                  <Sparkles className="h-3.5 w-3.5" /> Am extras aceste date — te rugăm să le confirmi
-                </div>
-                <h1 className="mt-3 font-display text-3xl md:text-4xl">Câteva detalii despre persoana iubită</h1>
-                <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                  {[
-                    { l: "Nume complet", v: "Maria Popescu" },
-                    { l: "CNP", v: "2•••••••••••" },
-                    { l: "Data decesului", v: "12 mai 2026" },
-                    { l: "Locul decesului", v: "București" },
-                    { l: "Stare civilă", v: "Căsătorită" },
-                  ].map((f) => (
-                    <div key={f.l}>
-                      <Label className="text-xs text-muted-foreground">{f.l}</Label>
-                      <Input defaultValue={f.v} className="mt-2 h-12 rounded-xl" />
-                    </div>
-                  ))}
-                </div>
+              <div className="mt-8 flex items-start gap-3 rounded-2xl border border-border bg-surface/60 p-4 text-sm text-muted-foreground">
+                <ShieldCheck className="mt-0.5 h-4 w-4 text-primary" />
+                <p>
+                  Nu colectăm date personale în această etapă. Răspunsul rămâne doar pe acest dispozitiv.
+                </p>
               </div>
-            )}
-
-            {step === 3 && (
-              <div>
-                <h1 className="font-display text-3xl md:text-4xl">Câteva întrebări în plus</h1>
-                <p className="mt-3 text-muted-foreground">Acestea îți modelează cronologia personală. Nu există răspunsuri greșite.</p>
-                <div className="mt-8 space-y-3">
-                  {[
-                    "Era pensionar/ă?",
-                    "Deținea o proprietate?",
-                    "Deținea un autovehicul?",
-                    "Era asociat/administrator de firmă?",
-                    "Există soț/soție supraviețuitor sau copii?",
-                  ].map((q) => (
-                    <div key={q} className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-5">
-                      <p className="text-sm md:text-base">{q}</p>
-                      <div className="flex gap-2">
-                        {["Da", "Nu", "Nu știu"].map((c) => (
-                          <button key={c} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs transition-colors hover:bg-surface-soft">
-                            {c}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="mt-12 flex items-center justify-between">
-          <Button variant="ghost" onClick={back} disabled={step === 0} className="rounded-full">
-            <ArrowLeft className="mr-1 h-4 w-4" /> Înapoi
-          </Button>
-          {step < steps.length - 1 ? (
-            <Button onClick={next} className="h-11 rounded-full px-6">
-              Continuă <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            </motion.div>
           ) : (
-            <Button asChild className="h-11 rounded-full px-6">
-              <a href="/dashboard">Vezi planul meu <ArrowRight className="ml-1 h-4 w-4" /></a>
-            </Button>
+            <motion.div
+              key={place}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4 }}
+            >
+              <button
+                onClick={() => setPlace(null)}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" /> Schimbă răspunsul
+              </button>
+
+              <div className="mt-5 flex items-center gap-3">
+                {selected && (
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <selected.icon className="h-5 w-5" />
+                  </span>
+                )}
+                <p className="text-sm uppercase tracking-wider text-muted-foreground">{selected?.label}</p>
+              </div>
+              <h1 className="mt-3 font-display text-3xl md:text-4xl text-balance">
+                Iată ce ai de făcut, pas cu pas.
+              </h1>
+
+              <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-surface p-5">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <p className="text-sm text-foreground/80 text-pretty">{guide!.intro}</p>
+              </div>
+
+              <ol className="mt-8 space-y-4">
+                {guide!.steps.map((s, i) => (
+                  <motion.li
+                    key={s.title}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: i * 0.05 }}
+                    className="rounded-2xl border border-border bg-card p-5 shadow-soft"
+                  >
+                    <div className="flex items-start gap-4">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-foreground text-sm font-medium text-background">
+                        {i + 1}
+                      </span>
+                      <div className="flex-1">
+                        <h2 className="font-display text-xl leading-snug">{s.title}</h2>
+                        <p className="mt-2 text-sm text-foreground/80 text-pretty">{s.what}</p>
+
+                        <dl className="mt-4 grid gap-2 text-sm">
+                          {s.where && (
+                            <Row icon={MapPin} label="De unde">{s.where}</Row>
+                          )}
+                          {s.who && (
+                            <Row icon={Phone} label="Cine">{s.who}</Row>
+                          )}
+                          {s.time && (
+                            <Row icon={Clock} label="Când">{s.time}</Row>
+                          )}
+                          {s.next && (
+                            <Row icon={CheckCircle2} label="Apoi">{s.next}</Row>
+                          )}
+                        </dl>
+                      </div>
+                    </div>
+                  </motion.li>
+                ))}
+              </ol>
+
+              <div className="mt-10 rounded-3xl border border-border bg-surface p-6 md:p-8">
+                <div className="flex items-start gap-4">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <FileText className="h-5 w-5" />
+                  </span>
+                  <div className="flex-1">
+                    <h3 className="font-display text-xl">Vrei să urmărim împreună fiecare pas?</h3>
+                    <p className="mt-1.5 text-sm text-muted-foreground text-pretty">
+                      Îți pregătim un plan personalizat — cu memento-uri delicate, formulare gata completate și o cronologie
+                      pentru perioada următoare (succesiune, pensie, taxe). Tot fără cont obligatoriu.
+                    </p>
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <Link to="/dashboard">
+                        <Button className="h-11 rounded-full px-5">
+                          Vezi planul complet <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link to="/translator">
+                        <Button variant="ghost" className="h-11 rounded-full px-5">
+                          Nu înțeleg un termen
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </div>
     </PageShell>
+  );
+}
+
+function Row({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: typeof MapPin;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-2.5 rounded-xl bg-surface-soft px-3 py-2">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+      <div className="flex-1">
+        <span className="mr-1 text-xs uppercase tracking-wider text-muted-foreground">{label}:</span>
+        <span className="text-foreground/85">{children}</span>
+      </div>
+    </div>
   );
 }

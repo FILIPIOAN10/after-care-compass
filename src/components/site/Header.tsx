@@ -27,11 +27,8 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link to="/onboarding" className="hidden sm:block">
-            <Button variant="ghost" className="rounded-full">Începe</Button>
-          </Link>
-          <Link to="/security">
-            <Button variant="outline" className="rounded-full">Autentificare</Button>
+          <Link to="/onboarding">
+            <Button className="rounded-full">Începe ghidarea</Button>
           </Link>
         </div>
       </div>
