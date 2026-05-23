@@ -75,9 +75,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "After — Calm guidance after a loss" },
       { name: "description", content: "After helps Romanian families navigate the legal and administrative steps that follow a death, with calm, step-by-step guidance." },
       { property: "og:title", content: "After — Calm guidance after a loss" },
-      { property: "og:description", content: "Step-by-step guidance for families after a death in Romania." },
+      { property: "og:description", content: "After helps Romanian families navigate the legal and administrative steps that follow a death, with calm, step-by-step guidance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "After — Calm guidance after a loss" },
+      { name: "twitter:description", content: "After helps Romanian families navigate the legal and administrative steps that follow a death, with calm, step-by-step guidance." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
