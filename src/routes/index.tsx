@@ -41,7 +41,7 @@ function Landing() {
               care urmează unei pierderi — cu cuvinte blânde și reamintiri delicate.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link to="/onboarding">
+              <Link to="/intake">
                 <Button size="lg" className="h-12 rounded-full px-6 text-base">
                   Începe ghidarea <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
@@ -163,7 +163,7 @@ function Landing() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">
-              <Link to="/onboarding">
+              <Link to="/intake">
                 <Button size="lg" variant="secondary" className="h-12 rounded-full px-6 text-base">
                   Începe ghidarea
                 </Button>

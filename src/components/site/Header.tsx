@@ -27,7 +27,7 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link to="/onboarding">
+          <Link to="/intake">
             <Button className="rounded-full">Începe ghidarea</Button>
           </Link>
         </div>
