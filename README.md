@@ -18,15 +18,15 @@ UI‑ul este în limba română.
 
 ## Funcționalități
 
-| Modul          | Frontend                                        | Backend                                                  |
-| -------------- | ----------------------------------------------- | -------------------------------------------------------- |
+| Modul          | Frontend                                            | Backend                                                       |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------- |
 | Cont           | Înregistrare, autentificare, 2FA (mock dev), logout | `POST /api/auth/register`, `/login`, `/2fa/verify`, `GET /me` |
 | Chestionar     | Onboarding în 4 pași, creează dosarul familiei      | `POST /api/cases/me/onboarding` — generează sarcini personalizate |
-| Plan de sarcini | Listă grupată pe etape, schimbare status, notițe   | `GET /api/tasks`, `PATCH /api/tasks/{id}/status\|note`   |
-| Documente      | Încărcare, listare, descărcare, ștergere, filtrare  | `POST/GET/DELETE /api/documents`, `GET /{id}/download`   |
-| Familie        | Invitații cu rol, eliminare acces, status invitație | `GET/POST/DELETE /api/family/members`                    |
-| Traducător     | Chat care explică termeni birocratici în RO         | `POST /api/translator`, `GET /api/translator/suggestions` |
-| Jurnal         | Listă imutabilă a evenimentelor din dosar           | `GET /api/activity?limit=N`                               |
+| Plan de sarcini | Listă grupată pe etape, schimbare status, notițe   | `GET /api/tasks`, `PATCH /api/tasks/{id}/status\|note`        |
+| Documente      | Încărcare, listare, descărcare, ștergere, filtrare  | `POST/GET/DELETE /api/documents`, `GET /{id}/download`        |
+| Familie        | Invitații cu rol, eliminare acces, status invitație | `GET/POST/DELETE /api/family/members`                         |
+| Traducător     | Chat care explică termeni birocratici în RO         | `POST /api/translator`, `GET /api/translator/suggestions`     |
+| Jurnal         | Listă imutabilă a evenimentelor din dosar           | `GET /api/activity?limit=N`                                   |
 
 Tot ce a fost static înainte (sarcini, documente, persoane, jurnal) este acum
 salvat în baza de date și actualizat în timp real prin TanStack Query.
@@ -35,16 +35,25 @@ salvat în baza de date și actualizat în timp real prin TanStack Query.
 
 ## Pornire rapidă (dezvoltare locală)
 
-Ai nevoie de **Java 21**, **Maven 3.8+** și **bun** (sau `npm`).
+Ai nevoie de **Java 21** și **bun** (sau `npm`). **Maven nu trebuie instalat**
+— folosește scripturile `mvnw` / `mvnw.cmd` din `backend/`.
 
 ### 1. Pornește backend‑ul
 
+**Linux / macOS:**
 ```bash
 cd backend
-mvn spring-boot:run
+./mvnw spring-boot:run
+```
+
+**Windows (PowerShell):**
+```powershell
+cd backend
+.\mvnw.cmd spring-boot:run
 ```
 
 API‑ul rulează implicit pe `http://localhost:8090`.
+Prima rulare descarcă automat Maven 3.9 (≈10 MB) și dependențele Spring Boot.
 Datele sunt în H2 in‑memory — se șterg la repornire.
 Documentele încărcate sunt scrise în `backend/uploads/`.
 
@@ -70,6 +79,8 @@ Vite servește pe `http://localhost:8080`.
 4. Încarcă documente, schimbă statusul sarcinilor, invită membri ai familiei,
    întreabă traducătorul.
 
+> **Cod 2FA**: în dezvoltare orice 6 cifre merg (ex. `123456`).
+
 ---
 
 ## Configurare backend
@@ -90,7 +101,7 @@ suprascrise prin variabile de mediu:
 SPRING_PROFILES_ACTIVE=postgres \
 DB_URL=jdbc:postgresql://localhost:5432/after \
 DB_USERNAME=after DB_PASSWORD=after \
-mvn -pl backend spring-boot:run
+./mvnw -pl backend spring-boot:run
 ```
 
 ---
@@ -99,7 +110,7 @@ mvn -pl backend spring-boot:run
 
 ```bash
 # Backend (un singur jar runnable)
-cd backend && mvn -DskipTests package
+cd backend && ./mvnw -DskipTests package
 java -jar target/after-api-0.1.0.jar
 
 # Frontend (static + Cloudflare Worker)
@@ -114,6 +125,7 @@ bun run build
 .
 ├── backend/                 # Spring Boot API
 │   ├── pom.xml
+│   ├── mvnw / mvnw.cmd      # Maven Wrapper — nu necesită Maven instalat
 │   └── src/main/java/ro/after/api/
 │       ├── auth/            # User, JWT, AuthController
 │       ├── case_/           # Dosarul familiei + onboarding
